@@ -13,6 +13,22 @@
       "description": "Agent language",
       "value": "en",
       "required": false
+    },
+    "ACCOUNT_SID": {
+      "description": "Account Sid",
+      "value": "en"
+    },
+    "SERVICE_SID": {
+      "description": "Service Sid",
+      "value": "en"
+    },
+    "SIGNING_KEY_SID": {
+      "description": "Signing key SID",
+      "value": "en"
+    },
+    "SIGNING_KEY_SECRET": {
+      "description": "Signing key Secret",
+      "value": "en"
     }
   },
   "engines": {

@@ -18,6 +18,38 @@ module.exports = class TwilioBotConfig {
         this._apiaiLang = value;
     }
 
+    get accountSid() {
+        return this._accountSid;
+    }
+
+    set accountSid(value) {
+        this._accountSid = value;
+    }
+
+    get serviceSid() {
+        return this._serviceSid;
+    }
+
+    set serviceSid(value) {
+        this._serviceSid = value;
+    }
+
+    get signingKeySid() {
+        return this._signingKeySid;
+    }
+
+    set signingKeySid(value) {
+        this._signingKeySid = value;
+    }
+
+    get signingKeySecret() {
+        return this._signingKeySecret;
+    }
+
+    set signingKeySecret(value) {
+        this._signingKeySecret = value;
+    }
+
     get devConfig() {
         return this._devConfig;
     }
@@ -26,21 +58,12 @@ module.exports = class TwilioBotConfig {
         this._devConfig = value;
     }
 
-    constructor(apiaiAccessToken, apiaiLang) {
+    constructor(apiaiAccessToken, apiaiLang, accountSid, serviceSid, signingKeySid, signingKeySecret) {
         this._apiaiAccessToken = apiaiAccessToken;
         this._apiaiLang = apiaiLang;
-    }
-
-    toPlainDoc() {
-        return {
-            apiaiAccessToken: this._apiaiAccessToken,
-            apiaiLang: this._apiaiLang
-        }
-    }
-
-    static fromPlainDoc(doc){
-        return new TwilioBotConfig(
-            doc.apiaiAccessToken,
-            doc.apiaiLang);
+        this._accountSid = accountSid;
+        this._serviceSid = serviceSid;
+        this._signingKeySid = signingKeySid;
+        this._signingKeySecret = signingKeySecret;
     }
 };
