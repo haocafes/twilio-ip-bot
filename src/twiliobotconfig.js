@@ -2,6 +2,14 @@
 
 module.exports = class TwilioBotConfig {
 
+    get botIdentity() {
+        return this._botIdentity;
+    }
+
+    set botIdentity(value) {
+        this._botIdentity = value;
+    }
+
     get apiaiAccessToken() {
         return this._apiaiAccessToken;
     }
@@ -59,6 +67,7 @@ module.exports = class TwilioBotConfig {
     }
 
     constructor(apiaiAccessToken, apiaiLang, accountSid, serviceSid, signingKeySid, signingKeySecret) {
+        this.botIdentity = "bot";
         this._apiaiAccessToken = apiaiAccessToken;
         this._apiaiLang = apiaiLang;
         this._accountSid = accountSid;

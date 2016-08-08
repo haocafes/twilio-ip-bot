@@ -17,6 +17,7 @@
     "node-uuid": "^1.4.7",
     "request": "^2.71.0",
     "twilio": "^2.9.1",
+    "twilio-common": "^0.1.5",
     "twilio-ip-messaging": "^0.10.6"
   }
 }

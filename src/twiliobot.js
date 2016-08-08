@@ -4,7 +4,8 @@ const apiai = require('apiai');
 const uuid = require('node-uuid');
 const request = require('request');
 
-const Twilio = require('twilio-ip-messaging');
+const TwilioIPMessaging = require('twilio-ip-messaging');
+const TwilioCommon = require('twilio-common');
 var AccessToken = require('twilio').AccessToken;
 var IpMessagingGrant = AccessToken.IpMessagingGrant;
 
@@ -46,15 +47,23 @@ module.exports = class TwilioBot {
     }
 
     start() {
-
         this.getToken()
             .then((token) => {
-                this._accessManager = new Twilio.AccessManager(token);
-                this._client = new Twilio.IPMessaging.Client(this._accessManager);
+                this._accessManager = new TwilioCommon.AccessManager(token);
+                this._client = TwilioIPMessaging(this._accessManager);
+
+                this._client.on('messageAdded', (message) => this.processMessage(message));
 
                 return this._client.initialize();
-            });
+            })
+            .then(()=> {
+                console.log("IP client initialized");
 
+                this.tryToJoin();
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }
 
     getToken() {
@@ -63,7 +72,7 @@ module.exports = class TwilioBot {
             var deviceId = "server";
 
             // Create a unique ID for the client on their current device
-            var endpointId = appName + ':' + deviceId;
+            var endpointId = "TwilioChat:" + this.botConfig.botIdentity + ":browser";
 
             // Create a "grant" which enables a client to use IPM as a given user,
             // on a given device
@@ -80,19 +89,24 @@ module.exports = class TwilioBot {
                 this.botConfig.signingKeySecret
             );
             token.addGrant(ipmGrant);
+            token.identity = this.botConfig.botIdentity;
 
             resolve(token.toJwt());
         });
     }
 
-    processMessage(req, res) {
-        if (this._botConfig.devConfig) {
-            console.log("body", req.body);
-        }
+    processMessage(message) {
+        console.log("message", message);
 
-        if (req.body && req.body.session && req.body.session.from && req.body.session.initialText) {
-            let chatId = req.body.session.from.id;
-            let messageText = req.body.session.initialText;
+        if (message.body && message.channel && message.channel.sid) {
+            let chatId = message.channel.sid;
+            let messageText = message.body;
+            let currentChannel = message.channel;
+
+            if (message.author == this.botConfig.botIdentity) {
+                // skip bot's messages
+                return;
+            }
 
             console.log(chatId, messageText);
 
@@ -113,17 +127,18 @@ module.exports = class TwilioBot {
                         if (TwilioBot.isDefined(responseText)) {
                             console.log('Response as text message');
 
-                            res.status(200).json({
-                                say: {value: responseText}
-                            });
-
+                            currentChannel.sendMessage(responseText)
+                                .then(()=>{
+                                    console.log("Message sent");
+                                })
+                                .catch((err) =>{
+                                   console.log("Error while sending message", err);
+                                });
                         } else {
                             console.log('Received empty speech');
-                            return res.status(400).end('Received empty speech');
                         }
                     } else {
                         console.log('Received empty result');
-                        return res.status(400).end('Received empty result');
                     }
                 });
 
@@ -132,11 +147,9 @@ module.exports = class TwilioBot {
             }
             else {
                 console.log('Empty message');
-                return res.status(400).end('Empty message');
             }
         } else {
             console.log('Empty message');
-            return res.status(400).end('Empty message');
         }
     }
 
@@ -150,5 +163,29 @@ module.exports = class TwilioBot {
         }
 
         return obj != null;
+    }
+
+    tryToJoin() {
+        this._client.getChannelByUniqueName('bot_channel')
+            .then((channel)=> {
+                if (!channel) {
+                    this._client.createChannel({
+                        uniqueName: 'bot_channel',
+                        friendlyName: 'Channel for API.AI bot'
+                    }).then(function (createdChannel) {
+                        console.log("Created channel 'bot_channel'");
+                        createdChannel.join().then(()=>{
+                            createdChannel.sendMessage("Hello, I'm API.AI Bot.");
+                        });
+                    });
+                } else {
+                    channel.join().then(()=>{
+                        channel.sendMessage("Hello, I'm API.AI Bot.");
+                    });
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            })
     }
 }

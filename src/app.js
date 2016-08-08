@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const bodyParser = require('body-parser');
 
 const TwilioBot = require('./twiliobot');
 const TwilioBotConfig = require('./twiliobotconfig');
@@ -25,21 +24,6 @@ const bot = new TwilioBot(botConfig);
 bot.start();
 
 const app = express();
-
-app.use(bodyParser.json());
-
-app.post('/webhook', (req, res) => {
-
-    console.log('POST sms received');
-
-    try {
-        bot.processMessage(req, res);
-    } catch (err) {
-        return res.status(400).send('Error while processing ' + err.message);
-    }
-});
-
-
 app.listen(REST_PORT, function () {
     console.log('Rest service ready on port ' + REST_PORT);
 });
