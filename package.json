@@ -1,7 +1,7 @@
 {
   "name": "apiai-twilio-ip-bot",
   "version": "1.0.0",
-  "description": "API.AI Twilio Bot",
+  "description": "API.AI Twilio Ip Bot",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
